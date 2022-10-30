@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+ name: jenkins-cluster-role
+rules:
+ - apiGroups: ['apps', 'extensions']
+   resources: ['deployments']
+   verbs: ['get', 'create', 'patch']
+ - apiGroups: ['']
+   resources: ['services']
+   verbs: ['get', 'create', 'patch']
+ - apiGroups: ['networking.k8s.io']
+   resources: ['ingresses']
+   verbs: ['get', 'create', 'patch'] 
+ - apiGroups: [''] 
+   resources: ['secrect'] 
+   verbs: ['get', 'create', 'patch']
+ - apiGroups: ['configuration.konghq.com'] 
+   resources: ['kongplugins', 'kongcoumers'] 
+   verbs: ['get', 'create', 'patch']
+ - apiGroups: ['']
+   resources: ['pods']
+   verbs: ['get', 'create', 'patch']
+

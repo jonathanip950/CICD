@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: production
+  name: generator-document
+  annotations:
+    konghq.com/strip-path: 'true'
+    konghq.com/plugins: prometheus
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+  ingressClassName: kong
+  rules:
+    - host: api.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: generator-document
+                port:
+                  name: http
+            path: /generator-document
+            pathType: ImplementationSpecific

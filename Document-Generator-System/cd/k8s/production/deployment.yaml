@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: generator-document
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: production
+      resource-name: generator-document
+  template:
+    metadata:
+      namespace: production
+      name: generator-document
+      labels:
+        resource-namespace: jebsen
+        resource-env: production
+        resource-name: generator-document
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/document-generator-system:latest
+          #args: ["--spring.profiles.active=test"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials

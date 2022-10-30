@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: test
+  name: beveragewebapppoc
+  annotations:
+    konghq.com/strip-path: 'true'
+    konghq.com/plugins: prometheus
+spec:
+  ingressClassName: kong
+  rules:
+    - host: servicetest.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: oms
+                port:
+                  name: http
+            path: /test/beveragewebapppoc/api
+            pathType: ImplementationSpecific

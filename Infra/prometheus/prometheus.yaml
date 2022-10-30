@@ -1,0 +1,63 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: prometheus-server
+  namespace: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: server
+      release: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        chart: prometheus-13.0.2
+        component: server
+        heritage: Helm
+        release: prometheus
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-server
+            defaultMode: 420
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: prometheus-data
+      containers:
+        - name: prometheus-server-configmap-reload
+          image: jimmidyson/configmap-reload:v0.4.0
+          args:
+            - '--volume-dir=/etc/config'
+            - '--webhook-url=http://127.0.0.1:9090/-/reload'
+          resources: {}
+          volumeMounts:
+            - name: config-volume
+              readOnly: true
+              mountPath: /etc/config
+        - name: prometheus-server
+          image: quay.io/prometheus/prometheus:v2.22.1
+          args:
+            - '--storage.tsdb.retention.time=7d'
+            - '--config.file=/etc/config/prometheus.yml'
+            - '--storage.tsdb.path=/data'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--web.enable-lifecycle'
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+            - name: storage-volume
+              mountPath: /data
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%

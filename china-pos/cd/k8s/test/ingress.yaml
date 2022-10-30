@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: test
+  name: wms-ws
+  annotations:
+    konghq.com/plugins: rate-limiting,request-size-limiting,prometheus
+    konghq.com/strip-path: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+  ingressClassName: kong
+  rules:
+    - host: servicetest.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: wms-ws
+                port:
+                  name: http
+            path: /uat/wms-ws
+            pathType: ImplementationSpecific

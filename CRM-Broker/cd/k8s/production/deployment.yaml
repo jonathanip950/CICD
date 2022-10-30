@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: crm-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: production
+      resource-name: crm-broker
+  template:
+    metadata:
+      namespace: production
+      name: crm-broker
+      labels:
+        resource-namespace: jebsen
+        resource-env: production
+        resource-name: crm-broker
+        internal-traffic: 'true'
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '8001'
+    spec:
+      hostAliases:
+        - ip: "10.10.0.85"
+          hostnames:
+            - "axdb01"
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/crm-broker:latest
+          args: ["--spring.profiles.active=prod"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials

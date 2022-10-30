@@ -1,0 +1,36 @@
+pipeline {
+
+    agent any
+    
+    environment {
+        REPO_URL = "https://github.com/Jebsen-GIT/broker-sdk.git"
+    }
+
+	stages {
+	    stage("pull source code from GIT") {
+	        steps{
+				//check from branch or tag
+				script{
+					if(TAG!=null && !TAG.contains("develop")) {
+						BRANCH = TAG
+					}
+				}
+	            checkout scm: [$class: 'GitSCM',
+	                           userRemoteConfigs: [[url: "${REPO_URL}",
+	                                                credentialsId: "48f8fff9-bb45-41fe-9138-e7c6d4b4e163"]],
+	                           branches: [[name: "${BRANCH}"]]
+	            ], poll: true
+	        }
+	    }
+	
+		stage('Build & Publish to Githup Maven Repo') {
+			steps {
+				withMaven {
+					sh 'chmod +x mvnw'
+					sh './mvnw clean'
+					sh './mvnw deploy -Dmaven.test.skip=true'
+				}
+			}
+		}
+	}
+}

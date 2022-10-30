@@ -1,0 +1,7 @@
+basicAuth:
+  enabled: true
+  username: admin
+  password: kafkagitkafka
+
+zkHosts: kafka-zookeeper.kafka.svc.cluster.local:2181
+

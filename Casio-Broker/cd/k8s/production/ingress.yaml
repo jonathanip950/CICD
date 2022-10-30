@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: production
+  name: casio-broker
+  annotations:
+    konghq.com/plugins: prometheus
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+  ingressClassName: kong
+  rules:
+    - host: api.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: casio-broker
+                port:
+                  name: http
+            path: /JEB_JCP/api/oms/CSOVHK/
+            pathType: ImplementationSpecific
+    - host: api.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: casio-broker
+                port:
+                  name: http
+            path: /webservices/rest/CSHKSHOP_OM_PKG/create_online_order/
+            pathType: ImplementationSpecific
+    - host: api.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: casio-broker
+                port:
+                  name: http
+            path: /webservices/rest/CSHKSHOP_OM_PKG/update_delivery_info/
+            pathType: ImplementationSpecific
+    - host: api.jebsen.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: casio-broker
+                port:
+                  name: http
+            path: /webservices/rest/CSHKSHOP_OM_PKG/update_delivery_status/
+            pathType: ImplementationSpecific

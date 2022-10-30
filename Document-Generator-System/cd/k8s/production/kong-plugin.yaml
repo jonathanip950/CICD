@@ -1,0 +1,9 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  namespace: production
+  name: rate-limiting
+plugin: rate-limiting
+config:
+  second: 20
+  policy: local

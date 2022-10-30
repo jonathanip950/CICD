@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: development
+  name: casio-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: development
+      resource-name: casio-broker
+  template:
+    metadata:
+      namespace: development
+      name: casio-broker
+      labels:
+        resource-namespace: jebsen
+        resource-env: development
+        resource-name: casio-broker
+    spec:
+      hostAliases:
+        - ip: "192.168.11.42"
+          hostnames:
+            - "oms11.jebsenconsumer.com"
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/casio-broker:develop-latest
+          args: ["--spring.profiles.active=test"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials
+      nodeName: hk01idcwrk03
+

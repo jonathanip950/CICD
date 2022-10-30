@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: ax-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: production
+      resource-name: ax-admin
+  template:
+    metadata:
+      namespace: production
+      name: ax-admin
+      labels:
+        resource-namespace: jebsen
+        resource-env: production
+        resource-name: ax-admin
+        internal-traffic: 'true'
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '8001'
+    spec:
+      hostAliases:
+        - ip: "192.168.11.41"
+          hostnames:
+            - "oms01.jebsenconsumer.com"
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/ax-admin:latest
+          args: ["--spring.profiles.active=prod"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials

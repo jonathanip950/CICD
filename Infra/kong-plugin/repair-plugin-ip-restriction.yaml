@@ -1,0 +1,8 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: repair-ip-restriction
+config: 
+  allow:
+plugin: ip-restriction
+

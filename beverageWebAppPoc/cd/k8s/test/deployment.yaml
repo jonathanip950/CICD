@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: test
+  name: beveragewebapppoc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: test
+      resource-name: beveragewebapppoc
+  template:
+    metadata:
+      namespace: test
+      name: beverageWebAppPoc
+      labels:
+        resource-namespace: jebsen
+        resource-env: test
+        resource-name: beveragewebapppoc
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/beveragewebapppoc:test-latest
+          args: ["--spring.profiles.active=uat"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials
+

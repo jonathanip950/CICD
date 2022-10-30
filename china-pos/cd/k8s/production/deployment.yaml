@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: china-pos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: production
+      resource-name: china-pos
+  template:
+    metadata:
+      namespace: production
+      name: china-pos
+      labels:
+        resource-namespace: jebsen
+        resource-env: production
+        resource-name: china-pos
+    spec:
+      containers:
+        - name: china-pos
+          image: ghcr.io/jebsen-git/china-pos:latest
+          args: ["--spring.profiles.active=prod"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+        - image: 'busybox:ubuntu-14.04'
+          imagePullPolicy: IfNotPresent
+          name: busybox
+          stdin: true
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials

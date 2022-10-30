@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: development
+  name: china-pos
+spec:
+  selector:
+    resource-namespace: jebsen
+    resource-env: development
+    resource-name: china-pos
+  ports:
+    - name: http
+      targetPort: 8080
+      port: 8080

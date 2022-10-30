@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jenkins
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:2.277.2-lts-jdk11
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: http-port
+            containerPort: 8080
+          - name: jnlp-port
+            containerPort: 50000
+        volumeMounts:
+          - name: jenkins-home
+            mountPath: /var/jenkins_home
+          - name: docker
+            mountPath: /var/run/docker.sock
+        env:
+          - name: JENKINS_OPTS
+            value: "--prefix=/jenkins"
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+           claimName: jenkins-home
+        - name: docker
+          hostPath: 
+           path: /var/run/docker.sock
+      nodeSelector:
+        jenkins-node: 'true'
+      securityContext:
+        fsGroup: 1000 
+        runAsUser: 0
+      serviceAccountName: jenkins

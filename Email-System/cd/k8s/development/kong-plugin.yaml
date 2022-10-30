@@ -1,0 +1,18 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  namespace: development
+  name: rate-limiting
+plugin: rate-limiting
+config:
+  second: 1
+  policy: local
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  namespace: development
+  name: request-size-limiting
+plugin: request-size-limiting
+config:
+  allowed_payload_size: 1

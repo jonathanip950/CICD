@@ -1,0 +1,84 @@
+pipeline {
+
+    agent any
+    tools {
+        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'docker'
+    }
+
+    environment {
+        REPO_URL = "https://github.com/Jebsen-GIT/beveragewebapppoc"
+        REGISTRY_URL = "ghcr.io/jebsen-git/beveragewebapppoc"
+        GITHUB_AUTH_CRED = credentials("48f8fff9-bb45-41fe-9138-e7c6d4b4e163")
+        DOCKER_CERT_PATH = credentials("48f8fff9-bb45-41fe-9138-e7c6d4b4e163")
+    }
+
+    stages {
+        stage("pull source code from GIT") {
+            steps{
+                //check from branch or tag
+                script{
+                    if(TAG!=null && !TAG.contains("develop")&& !TAG.contains("test")) {
+                        BRANCH = TAG
+                    }
+                }
+
+                checkout scm: [$class: 'GitSCM',
+                               userRemoteConfigs: [[url: "${REPO_URL}",
+                                                    credentialsId: "48f8fff9-bb45-41fe-9138-e7c6d4b4e163"]],
+                               branches: [[name: "${BRANCH}"]]
+                ],
+                        poll: false
+            }
+        }
+
+        stage('Build & Publish to GHCR') {
+            steps {
+
+                //determine environment
+                script{
+                    if(TAG != null && !TAG.contains("develop")&& !TAG.contains("test")) {
+                        env.IMAGE_TAG = TAG
+                        if (TAG.contains("beta")){
+                            env.EXTRA_TAG = "beta-latest"
+                        }
+                        else {
+                            env.EXTRA_TAG = "latest"
+                        }
+
+                    }
+
+                   	else {
+                   	    env.IMAGE_TAG = "0.${BUILD_NUMBER}.0"
+                   	if(TAG.contains("test")){
+                   		env.EXTRA_TAG = "test-latest"
+                   	}else{
+                   		env.EXTRA_TAG = "develop-latest"
+                   		}
+                   	}
+                }
+
+                withMaven {
+                    sh 'chmod +x mvnw'
+                    sh './mvnw clean'
+                    sh './mvnw package'
+                }
+
+                sh 'docker build -t $REGISTRY_URL:$IMAGE_TAG -t $REGISTRY_URL:$EXTRA_TAG .'
+                sh 'docker login ghcr.io --username=$DOCKER_CERT_PATH_USR --password=$DOCKER_CERT_PATH_PSW'
+                sh 'docker push $REGISTRY_URL'
+            }
+        }
+    }
+
+    post {
+        success {
+            script{
+             if(TAG.contains("develop")) {
+                    //For Development, auto trigger CD.
+                    echo 'Run cd pipeline!'
+                    build job: 'beverageWebAppPoc-CD'
+                }
+            }
+        }
+    }
+}

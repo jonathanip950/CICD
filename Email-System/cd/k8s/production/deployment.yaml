@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: email-email
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: production
+      resource-name: email-email
+  template:
+    metadata:
+      namespace: production
+      name: email-email
+      labels:
+        resource-namespace: jebsen
+        resource-env: production
+        resource-name: email-email
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/email-system:latest
+          #args: ["--spring.profiles.active=test"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials
+

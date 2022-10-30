@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = "https://github.com/Jebsen-GIT/CICD.git"
+        GITHUB_AUTH_CRED = credentials("48f8fff9-bb45-41fe-9138-e7c6d4b4e163")
+    }
+
+    stages {
+        stage("pull K8S configs from GIT") {
+            steps {
+                git branch: 'master',
+                        credentialsId: "48f8fff9-bb45-41fe-9138-e7c6d4b4e163",
+                        url: "${REPO_URL}"
+            }
+        }
+
+        stage("Install kubectl") {
+            steps {
+                sh '''
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+                '''
+            }
+        }
+
+        stage('Deploy to K8S') {
+            steps {
+
+                script{
+                    switch(params.BUILD_ENVIRONMENT){
+                        case "develop":
+                            env.ENVIRONMENT = "development"
+                            break;
+                        case "test/uat":
+                            env.ENVIRONMENT = "test"
+                            break;
+                        default:
+                            env.ENVIRONMENT = params.BUILD_ENVIRONMENT
+                    }
+                }
+
+                withKubeConfig([credentialsId: '847c4c50-3bb1-4b68-83e0-326be354f64b', serverUrl: 'https://10.10.240.97:6443']) {
+                    sh 'kubectl apply -f ./china-pos/cd/k8s/${ENVIRONMENT}'
+                    sh 'kubectl rollout restart deployment/china-pos -n ${ENVIRONMENT}'
+                }
+            }
+        }
+    }
+}

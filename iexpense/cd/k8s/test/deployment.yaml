@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: test
+  name: iexpense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource-namespace: jebsen
+      resource-env: test
+      resource-name: iexpense
+  template:
+    metadata:
+      namespace: test
+      name: iexpense
+      labels:
+        resource-namespace: jebsen
+        resource-env: test
+        resource-name: iexpense
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/jebsen-git/iexpense:beta-latest
+          args: ["--spring.profiles.active=uat"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: ghcr-image-pull-credentials
+
